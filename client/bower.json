@@ -1,0 +1,21 @@
+{
+  "name": "client",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Cody Seibert <cseibert113@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/codyseibert/goblins",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.2.4"
+  }
+}
