@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "jquery": "~2.2.4",
-    "socket.io-client": "~1.4.6"
+    "socket.io-client": "~1.4.6",
+    "lodash": "~4.13.1"
   }
 }
