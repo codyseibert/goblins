@@ -8,9 +8,8 @@
 #### Client
 1. Terminal A
 2. `cd client`
-3. `npm install`
-4. `bower install`
-5. `http-server -p 10000`
+3. `bower install`
+4. `http-server -p 10000`
 
 #### Server
 1. Terminal B
