@@ -154,6 +154,6 @@ setInterval(function(){
 var port = process.env.PORT || 8080;
 var router = express.Router();
 
-app.use('/api', router);
+// app.use('/api', router);
 
 server.listen(port);

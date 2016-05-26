@@ -59,11 +59,8 @@ $(document).ready(function(){
     if (!players[p.id]) {
       players[p.id] = p;
     }
-
     var player = players[p.id];
-
     _.extend(player, p);
-
     render()
   });
 
