@@ -9,7 +9,7 @@ $(document).ready(function(){
 
   var players = {};
 
-  var id = null;
+  var playerId = null;
 
   var playerImg = new Image();
   playerImg.src = "images/player.gif";
@@ -17,14 +17,22 @@ $(document).ready(function(){
   var crateImg = new Image();
   crateImg.src = "images/crate.jpg";
 
+  var orcImg = new Image();
+  orcImg.src = "images/orc.png";
+
+  var skullImg = new Image();
+  skullImg.src = "images/skull.png";
+
   var A = 97;
   var D = 100;
   var SPACE = 32;
+  var E = 69;
 
   var keyMap = {
     65: 'left',
     68: 'right',
-    32: 'jump'
+    32: 'jump',
+    69: 'explode'
   };
 
   var input = {}
@@ -52,7 +60,7 @@ $(document).ready(function(){
   });
 
   socket.on('id', function(i) {
-    id = i;
+    playerId = i;
   });
 
   socket.on('player', function(p) {
@@ -71,9 +79,9 @@ $(document).ready(function(){
   function render() {
     var cx, cy;
     cx = cy = 0;
-    if (id) {
-      cx = parseInt(window.innerWidth / 2 - players[id].x, 10);
-      cy = parseInt(window.innerHeight / 2 - players[id].y, 10);
+    if (playerId) {
+      cx = parseInt(window.innerWidth / 2 - players[playerId].x, 10);
+      cy = parseInt(window.innerHeight / 2 - players[playerId].y, 10);
     }
 
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -84,7 +92,9 @@ $(document).ready(function(){
       context.save();
       context.translate(player.x + cx, player.y + cy);
       context.scale(scaleX / scale, 1 / scale);
-      context.drawImage(playerImg, -150, -64);
+      var img = player.team === 0 ? playerImg : orcImg
+      img = player.isAlive ? img : skullImg;
+      context.drawImage(img, -150, -64);
       context.restore();
     }
 

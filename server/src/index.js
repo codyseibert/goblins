@@ -39,20 +39,25 @@ var JUMP_SPEED = -5.0;
 var GRAVITY = 0.2;
 var SPEED = 5;
 var FRICTION = 0.80;
+var EXPLODE_SPEED = 30;
+var RESPAWN_TIME = 3000;
 
 var User = function (){
   this.x = 0;
   this.y = 0;
   this.vx = 0;
   this.vy = 0;
+  this.isAlive = true;
   this.id = null;
   this.width = 50;
   this.height = 50;
+  this.team = parseInt(Math.random()*2)
   this.isFacingLeft = false;
   this.input = {
     left: false,
     right: false,
-    jump: false
+    jump: false,
+    explode: false
   };
   this.canJump = false;
 };
@@ -62,6 +67,8 @@ var disconnectQueue = []
 io.on('connection', function(client) {
 
   client.emit('map', map);
+
+  console.log(client.id);
   client.emit('id', client.id);
 
   client.on('join', function() {
@@ -76,6 +83,7 @@ io.on('connection', function(client) {
   client.on('disconnect', function() {
     disconnectQueue.push(users[client.id]);
   });
+
 });
 
 var isColliding = function(player, objects) {
@@ -106,12 +114,28 @@ setInterval(function(){
   var userIds = Object.keys(users);
   userIds.forEach(function(id) {
     var user = users[id];
-    if (user.input.left) {
-      user.vx = -SPEED;
-      user.isFacingLeft = true;
-    } else if (user.input.right) {
-      user.vx = SPEED;
-      user.isFacingLeft = false;
+
+    if (user.isAlive) {
+      if (user.input.left) {
+        user.vx = -SPEED;
+        user.isFacingLeft = true;
+      } else if (user.input.right) {
+        user.vx = SPEED;
+        user.isFacingLeft = false;
+      }
+    }
+
+    if (user.input.explode && user.isAlive) {
+      user.isAlive = false;
+      user.vx = parseInt(Math.random() * EXPLODE_SPEED) - EXPLODE_SPEED / 2
+      user.vy = Math.max(-5, parseInt(Math.random() * -EXPLODE_SPEED))
+      io.emit('explode', user);
+
+      setTimeout(function(){
+        user.x = 100;
+        user.y = 0;
+        user.isAlive = true;
+      }, RESPAWN_TIME);
     }
 
     if (user.input.jump && user.canJump) {
