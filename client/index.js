@@ -68,6 +68,7 @@ $(document).ready(function(){
       players[p.id] = p;
     }
     var player = players[p.id];
+    player.lastUpdated = new Date();
     _.extend(player, p);
     render()
   });
@@ -75,6 +76,16 @@ $(document).ready(function(){
   socket.on('player.disconnected', function(p) {
     delete players[p.id]
   });
+
+  setInterval(function() {
+    for (var i in Object.keys(players)) {
+      var key = Object.keys(players)[i]
+      var player = players[key];
+      if (player && player.lastUpdated < (new Date().getTime() - 10000)) {
+        delete players[key]
+      }
+    }
+  }, 1000);
 
   function render() {
     var cx, cy;
