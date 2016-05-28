@@ -1,3 +1,11 @@
+// TODO:
+// - show an explosion when user explodes
+// - center the explosion "near" call on the player
+// - create a more advanced map
+// - kill a player when they go out of bounds
+// - have a map timer
+
+
 require('dotenv').config();
 var express = require('express');
 var app = express();
@@ -33,6 +41,8 @@ app.use(cors());
 var clients = {}
 var users = {}
 
+var roundOver = false;
+
 var JUMP_OFFSET = 5;
 var JUMP_HEIGHT = 50;
 var JUMP_SPEED = -5.0;
@@ -42,6 +52,7 @@ var FRICTION = 0.80;
 var EXPLODE_SPEED = 30;
 var RESPAWN_TIME = 3000;
 var EXPLODE_RADIUS = 500;
+var ROUND_OVER_TIME = 5000;
 
 var User = function (){
   this.x = 0;
@@ -109,16 +120,63 @@ var isColliding = function(player, objects) {
   return false;
 }
 
+function spawn(user) {
+  user.x = 100;
+  user.y = 100;
+  user.isAlive = true;
+}
+
+function isRoundOver() {
+  var goblins = 0;
+  var orcs = 0;
+  Object.keys(users).forEach(function(id) {
+    var user = users[id];
+    if (user.team === 1) {
+      goblins++;
+    } else {
+      orcs++;
+    }
+  })
+  return orcs === 0;
+}
+
+function restartRound() {
+  roundOver = true
+  io.emit('round.end');
+  setTimeout(function(){
+    io.emit('round.start');
+    Object.keys(users).forEach(function(id) {
+      var user = users[id];
+      spawn(user);
+      user.team = 0;
+    })
+    var userIds = Object.keys(users);
+    var random = userIds[parseInt(Math.random()*userIds.length)];
+    users[random].team = 1;
+    roundOver = false;
+  }, ROUND_OVER_TIME);
+}
+
+function checkForEndRound() {
+  if (!roundOver && isRoundOver()) {
+    restartRound();
+  }
+}
+
 function kill(user){
   user.isAlive = false;
+  user.team = 1;
+
   setTimeout(function(){
-    user.x = 100;
-    user.y = 0;
-    user.isAlive = true;
+    if (!roundOver) {
+      spawn(user);
+    }
   }, RESPAWN_TIME);
 }
 
 setInterval(function(){
+  checkForEndRound();
+
   // Handle Inputs & Update Positions
   var userIds = Object.keys(users);
   userIds.forEach(function(id) {

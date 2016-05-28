@@ -1,3 +1,11 @@
+// TODO:
+// - show an explosion sprite when user explodes centered on the player
+// - show 'round over' text when the round is over
+// - show a 'count down' till the next round
+// - fix the player sprites
+// - show user names over the players
+// - show a score board
+
 $(document).ready(function(){
   var canvas = document.getElementById('canvas');
   var context = canvas.getContext("2d");
@@ -77,11 +85,19 @@ $(document).ready(function(){
     delete players[p.id]
   });
 
+  socket.on('round.end', function(){
+
+  });
+
+  socket.on('round.start', function() {
+
+  });
+
   setInterval(function() {
     for (var i in Object.keys(players)) {
       var key = Object.keys(players)[i]
       var player = players[key];
-      if (player && player.lastUpdated < (new Date().getTime() - 10000)) {
+      if (player && player.lastUpdated < (new Date().getTime() - 2000)) {
         delete players[key]
       }
     }
