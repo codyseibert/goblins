@@ -41,6 +41,7 @@ var SPEED = 5;
 var FRICTION = 0.80;
 var EXPLODE_SPEED = 30;
 var RESPAWN_TIME = 3000;
+var EXPLODE_RADIUS = 500;
 
 var User = function (){
   this.x = 0;
@@ -68,7 +69,6 @@ io.on('connection', function(client) {
 
   client.emit('map', map);
 
-  console.log(client.id);
   client.emit('id', client.id);
 
   client.on('join', function() {
@@ -109,6 +109,15 @@ var isColliding = function(player, objects) {
   return false;
 }
 
+function kill(user){
+  user.isAlive = false;
+  setTimeout(function(){
+    user.x = 100;
+    user.y = 0;
+    user.isAlive = true;
+  }, RESPAWN_TIME);
+}
+
 setInterval(function(){
   // Handle Inputs & Update Positions
   var userIds = Object.keys(users);
@@ -125,17 +134,23 @@ setInterval(function(){
       }
     }
 
-    if (user.input.explode && user.isAlive) {
+    if (user.team === 1 && user.input.explode && user.isAlive) {
       user.isAlive = false;
       user.vx = parseInt(Math.random() * EXPLODE_SPEED) - EXPLODE_SPEED / 2
       user.vy = Math.max(-5, parseInt(Math.random() * -EXPLODE_SPEED))
       io.emit('explode', user);
 
-      setTimeout(function(){
-        user.x = 100;
-        user.y = 0;
-        user.isAlive = true;
-      }, RESPAWN_TIME);
+      userIds.forEach(function(userId) {
+        var u = users[userId];
+        if (u == user) return;
+        var v1 = Vec2.create(user.x, user.y);
+        var v2 = Vec2.create(u.x, u.y);
+        if (Vec2.near(v1, v2, EXPLODE_RADIUS)) {
+          kill(u);
+        }
+      });
+
+      kill(user);
     }
 
     if (user.input.jump && user.canJump) {
@@ -149,7 +164,7 @@ setInterval(function(){
 
     user.x += user.vx;
     if (isColliding(user, map)) {
-      user.x -= user.xy;
+      user.x -= user.vx;
     }
 
     user.y += user.vy;

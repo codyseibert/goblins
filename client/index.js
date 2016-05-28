@@ -79,7 +79,7 @@ $(document).ready(function(){
   function render() {
     var cx, cy;
     cx = cy = 0;
-    if (playerId) {
+    if (playerId && players[playerId]) {
       cx = parseInt(window.innerWidth / 2 - players[playerId].x, 10);
       cy = parseInt(window.innerHeight / 2 - players[playerId].y, 10);
     }
