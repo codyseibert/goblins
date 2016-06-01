@@ -25,14 +25,18 @@ var Box = function(x, y, width, height) {
   this.height = height;
 };
 
+
 var map = [
   new Box(0, 300, 64, 64),
   new Box(64, 300, 64, 64),
   new Box(128, 300, 64, 64),
-  new Box(196, 300, 64, 64),
   new Box(300, 300, 64, 64),
   new Box(364, 300, 64, 64)
 ]
+
+for (var i = 0; i < 100; i++) {
+  map.push(new Box(i*64 - 500, 500, 64, 64))
+}
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -45,9 +49,9 @@ var roundOver = false;
 
 var JUMP_OFFSET = 5;
 var JUMP_HEIGHT = 50;
-var JUMP_SPEED = -5.0;
-var GRAVITY = 0.2;
-var SPEED = 5;
+var JUMP_SPEED = -15.0;
+var GRAVITY = 0.5;
+var SPEED = 8;
 var FRICTION = 0.80;
 var EXPLODE_SPEED = 30;
 var RESPAWN_TIME = 3000;
@@ -83,8 +87,10 @@ io.on('connection', function(client) {
   client.emit('id', client.id);
 
   client.on('join', function() {
-    users[client.id] = new User()
-    users[client.id].id = client.id;
+    user = new User()
+    user.id = client.id;
+    user.team = 1;
+    users[client.id] = user;
   });
 
   client.on('input', function(input) {
@@ -158,7 +164,7 @@ function restartRound() {
 }
 
 function checkForEndRound() {
-  if (!roundOver && isRoundOver()) {
+  if (Object.keys(users).length >= 2 && !roundOver && isRoundOver()) {
     restartRound();
   }
 }
@@ -252,5 +258,14 @@ var port = process.env.PORT || 8080;
 var router = express.Router();
 
 // app.use('/api', router);
+app.get('maps', function(req, res) {
+  res.status(200);
+  res.send([
+    {
+      name: 'testing',
+      screenshot: 'null.png'
+    }
+  ]);
+});
 
 server.listen(port);
